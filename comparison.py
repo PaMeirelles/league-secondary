@@ -1,6 +1,7 @@
 import pandas as pd
 from utility import get_champions
 from os import path
+import openpyxl
 
 
 def pair(c1, c2):
@@ -15,7 +16,7 @@ def pair(c1, c2):
 
     df3["wr_x"] = df3["wr_x"] - normal_x
     df3["wr_y"] = df3["wr_y"] - normal_y
-    
+
     df3["bonus"] = df3[["wr_x", "wr_y"]].agg("max", 1)
 
     m = [df3["bonus"] == df3["wr_x"]]
@@ -63,7 +64,8 @@ def pair_wr(c1, c2, show=False):
 
     final_wr = (d * w).sum() / w.sum()
     if show:
-        print(df3[["opponent", "wr_x", "wr_y", "pick"]])
+        print(df3[["opponent", "pick"]])
+        df3[["opponent", "pick"]].to_excel(f"excel/{c1}/{c2}.xlsx")
     return final_wr
 
 
@@ -74,5 +76,5 @@ def perfect_match(champion):
 
 
 print(perfect_match("Camille"))
-print(pair_wr("Camille", "Dr. Mundo", True))
+print(pair_wr("Camille", "Aatrox", True))
 
