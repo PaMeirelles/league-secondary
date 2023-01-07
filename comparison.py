@@ -4,12 +4,21 @@ from os import path
 
 
 def pair(c1, c2):
+    df = pd.read_csv("toplaners")
     df1 = pd.read_csv(f"matchups/{c1}")
     df2 = pd.read_csv(f"matchups/{c2}")
 
     df3 = df1.merge(df2, left_on="opponent", right_on="opponent")
-    df3["wr_pair"] = df3[["wr_x", "wr_y"]].agg("max", 1)
-    m = [df3["wr_pair"] == df3["wr_x"]]
+
+    normal_x = df[df["champion"] == c1]["wr"].values[0]
+    normal_y = df[df["champion"] == c2]["wr"].values[0]
+
+    df3["wr_x"] = df3["wr_x"] - normal_x
+    df3["wr_y"] = df3["wr_y"] - normal_y
+    
+    df3["bonus"] = df3[["wr_x", "wr_y"]].agg("max", 1)
+
+    m = [df3["bonus"] == df3["wr_x"]]
     for i in range(len(m[0])):
         if m[0][i]:
             m[0][i] = c1
@@ -18,13 +27,13 @@ def pair(c1, c2):
     df3["pick"] = m[0]
 
     a, b = df1[df1["opponent"] == c2]["wr"], df2[df2["opponent"] == c1]["wr"]
-    df3 = pd.concat([df3, pd.DataFrame({"opponent": c1, "wr_pair": b, "pick": c2})])
-    df3 = pd.concat([df3, pd.DataFrame({"opponent": c2, "wr_pair": a, "pick": c1})])
+    df3 = pd.concat([df3, pd.DataFrame({"opponent": c1, "bonus": b, "pick": c2})])
+    df3 = pd.concat([df3, pd.DataFrame({"opponent": c2, "bonus": a, "pick": c1})])
     return df3
 
 
 def get_ban(df, duo, champion, show=False):
-    d = df["wr_pair"]
+    d = df["bonus"]
     w = df["matches"]
 
     final_wr = (d * w).sum() / w.sum()
@@ -49,12 +58,12 @@ def pair_wr(c1, c2, show=False):
 
     df3 = df3[df3["opponent"] != banned]
 
-    d = df3["wr_pair"]
+    d = df3["bonus"]
     w = df3["matches"]
 
     final_wr = (d * w).sum() / w.sum()
     if show:
-        print(df3[["opponent", "pick"]])
+        print(df3[["opponent", "wr_x", "wr_y", "pick"]])
     return final_wr
 
 

@@ -42,16 +42,22 @@ def fill_all():
 def fill_champions():
     df = pd.read_csv("toplaners")
     matches = []
+    wrs = []
     for c in df["champion"]:
         url = f"https://u.gg/lol/champions/{format_name(c)}/build/top"
         page = get(url)
         soup = BeautifulSoup(page.content, "html.parser")
         divs = soup.find_all("div", {"class": "value"})
         match = divs[5].text
+        wr = divs[1].text
+        wrs.append(format_wr(wr))
         matches.append(format_matches(match))
 
     df["matches"] = matches
-    df.to_csv("toplaners")
+    df["wr"] = wrs
+    del df['Unnamed: 0']
+    del df['Unnamed: 0.1']
+    df.to_csv("toplaners", index=False)
 
 
-fill_all()
+fill_champions()

@@ -28,3 +28,4 @@ def format_matches(matches):
 def get_champions():
     df = pd.read_csv("toplaners")
     return [x.replace("\n", "") for x in df["champion"]]
+
